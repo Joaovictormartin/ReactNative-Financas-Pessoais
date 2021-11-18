@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "FinancaPessoais",
+    "slug": "FinancaPessoais",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "FinancaPessoais"
+}
