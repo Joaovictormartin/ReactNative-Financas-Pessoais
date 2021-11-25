@@ -1,9 +1,10 @@
 import styled from "styled-components/native";
-import { FlatList } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { FlatList } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { BorderlessButton } from "react-native-gesture-handler";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 
-import { DateListProps } from './index';
+import { DateListProps } from "./index";
 
 export const Container = styled.View`
   flex: 1;
@@ -60,7 +61,9 @@ export const UserName = styled.Text`
   color: ${({ theme }) => theme.colors.shape};
 `;
 
-export const IconLogout = styled(Feather)`
+export const LogoutButton = styled(BorderlessButton)``;
+
+export const Icon = styled(Feather)`
   color: ${({ theme }) => theme.colors.secondary};
   font-size: ${RFValue(24)}px;
 `;
@@ -68,7 +71,7 @@ export const IconLogout = styled(Feather)`
 export const HighlightCards = styled.ScrollView.attrs({
   horizontal: true,
   showsHorizontalScrollIndicator: false,
-  contentContainerStyle: {paddingHorizontal: 24 },
+  contentContainerStyle: { paddingHorizontal: 24 },
 })`
   width: 100%;
   position: absolute;
