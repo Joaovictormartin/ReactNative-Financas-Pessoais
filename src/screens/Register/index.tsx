@@ -1,8 +1,12 @@
 import React, { useState } from "react";
-import * as Yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useNavigation } from '@react-navigation/native';
 import { Modal, Alert, Keyboard, TouchableWithoutFeedback } from "react-native";
+
+import * as Yup from "yup";
+import uuid from 'react-native-uuid';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Button } from "../../components/Forms/Button";
 import { InputForm } from "../../components/Forms/InputForm";
@@ -41,7 +45,11 @@ export function Register() {
     name: "Categoria",
   });
 
+  const navigation = useNavigation();
+  const dataKey = "@gofinances:transactions";
+
   const {
+    reset,
     control,
     handleSubmit,
     formState: { errors },
@@ -61,7 +69,7 @@ export function Register() {
     setCategoryModalOpen(false);
   }
 
-  function handleRegister(form: FormDate) {
+  async function handleRegister(form: FormDate) {
     if (!transactionTypes) {
       return Alert.alert("Atenção", "Selecione o tipo da transação");
     }
@@ -70,14 +78,40 @@ export function Register() {
       return Alert.alert("Atenção", "Selecione a categoria");
     }
 
-    const data = {
+    const newTransaction = {
+      id: String(uuid.v4()),
       name: form.name,
       amount: form.amount,
       transactionTypes,
       category: category.key,
+      date: new Date()
     };
 
-    console.log(data);
+    try {
+      const data = await AsyncStorage.getItem(dataKey);   //pega o ultimo dado do AsyncStorage
+      const currentData = data ? JSON.parse(data) : [];   //converte para JSON
+
+      const dataFormatted = [                             //junta o ultimo com o new
+        ...currentData,
+        newTransaction,
+      ];
+
+      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted)); //salva o dado com a nova transaction
+
+      reset();
+      setTransactionTypes('');
+      setCategory({
+        key: 'category',
+        name: 'Categoria',
+      })
+
+      //@ts-ignore
+      navigation.navigate('Listagem');
+
+    } catch (err) {
+      console.log(err);
+      Alert.alert("Aviso", "Não foi possível salvar");
+    }
   }
 
   return (
