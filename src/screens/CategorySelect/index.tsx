@@ -25,7 +25,7 @@ interface Category {
 
 interface Props {
   category: Category;
-  setCategory: (category: Category) => void;
+  setCategory: any;
   closeSelectCategory: () => void;
 }
 
@@ -36,7 +36,12 @@ export function CategorySelect({
 } : Props) {
 
   function handleCategorySelect(item: Category) {
-    setCategory(item)
+    setCategory({
+      key: item.key,
+      name: item.name,
+      icon: item.icon,
+      color: item.color,
+    })
   }
 
   return (
