@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useTheme } from "styled-components";
+
+import { dataTransactionKey } from "../../utils/asyncStorageKeys";
 
 import { HighlightCard } from "../../components/HighlightCard";
-import { TransationCard, TransationCardProps } from "../../components/TransationCard";
+import {
+  TransationCard,
+  TransationCardProps,
+} from "../../components/TransationCard";
 
 import {
   Container,
+  LoadContainer,
   Header,
   UserWrapper,
   UserInfo,
@@ -24,99 +34,166 @@ export interface DateListProps extends TransationCardProps {
   id: string;
 }
 
-export function Dashboard() {
+interface HighlightProps {
+  amount: any;
+}
 
-  const data: DateListProps[] = [
-    {
-      id: '1',
-      type: 'positive',
-      title: "Desenvolvimento de site",
-      amount: "R$ 12.000,00",
-      category: {
-        name: 'Vendas',
-        icon: 'dollar-sign',
+interface HighlightDate {
+  entries: HighlightProps;
+  expensives: HighlightProps;
+  total: HighlightProps;
+}
+
+export function Dashboard() {
+  const { colors } = useTheme();
+
+  const [transitions, setTransitions] = useState<DateListProps[]>([]);
+  const [highlightData, setHighlightData] = useState<HighlightDate>(
+    {} as HighlightDate
+  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  async function loadTransitions() {
+    let entriesTotal = 0; //Variavel para soma as entradas
+    let expensiveTotal = 0; //Variavel para soma as saídas
+
+    const response = await AsyncStorage.getItem(dataTransactionKey); //pega os dados do AsyncStorage
+    const transaction = response ? JSON.parse(response) : []; //o JSON transforma em obj
+
+    const transactionsFormatted: DateListProps[] = transaction.map(
+      (item: DateListProps) => {
+        if (item.transactionTypes === "up") {
+          entriesTotal += Number(item.amount);
+        } else {
+          expensiveTotal = +Number(item.amount);
+        }
+
+        const amount = Number(item.amount) //Formatando para moeda real
+          .toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          });
+
+        const date = Intl.DateTimeFormat("pt-BR", {
+          //transforma o item para data dd/mm/yyyy
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }).format(new Date(item.date));
+
+        return {
+          id: item.id,
+          name: item.name,
+          amount,
+          transactionTypes: item.transactionTypes,
+          category: item.category,
+          date,
+        };
+      }
+    );
+
+    setTransitions(transactionsFormatted);
+
+    const total = entriesTotal - expensiveTotal; //Variavel para soma o total
+    setHighlightData({
+      entries: {
+        //Formantando a entrada para o real
+        amount: entriesTotal.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        })
       },
-      date:"13/04/2020"
-    },
-    {
-      id: '2',
-      type: 'negative',
-      title: "Hamburgueria Pizzy",
-      amount: "R$ 59,00",
-      category: {
-        name: 'Alimentação',
-        icon: 'coffee',
+      expensives: {
+        //Formantando a saída para o real
+        amount: expensiveTotal.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        })
       },
-      date:"10/04/2020"
-    },
-    {
-      id: '3',
-      type: 'negative',
-      title: "Aluguel do apartamento",
-      amount: "R$ 1.200,00",
-      category: {
-        name: 'Casa',
-        icon: 'shopping-bag',
+      total: {
+        //Formantando o total para o real
+        amount: total.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        })
       },
-      date:"27/03/2020"
-    }
-  ]
+    });
+
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    loadTransitions();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTransitions();
+    }, [])
+  );
 
   return (
     <Container>
-      <Header>
-        <UserWrapper>
-          <UserInfo>
-            <Avatar
-              source={{
-                uri: "https://avatars.githubusercontent.com/u/69825217?v=4",
-              }}
+      {isLoading ? (
+        <LoadContainer>
+          <ActivityIndicator color={colors.primary} size="large" />
+        </LoadContainer>
+      ) : (
+        <>
+          <Header>
+            <UserWrapper>
+              <UserInfo>
+                <Avatar
+                  source={{
+                    uri: "https://avatars.githubusercontent.com/u/69825217?v=4",
+                  }}
+                />
+                <User>
+                  <UserGreeting>Olá, </UserGreeting>
+                  <UserName>João</UserName>
+                </User>
+              </UserInfo>
+
+              <LogoutButton onPress={() => {}}>
+                <Icon name="power" />
+              </LogoutButton>
+            </UserWrapper>
+          </Header>
+
+          <HighlightCards>
+            <HighlightCard
+              type="up"
+              title="Entradas"
+              amount={highlightData?.entries?.amount}
+              lastTransition="Última entrada dia 13 de abril"
             />
-            <User>
-              <UserGreeting>Olá, </UserGreeting>
-              <UserName>João</UserName>
-            </User>
-          </UserInfo>
-          
-          <LogoutButton onPress={ () => {} }>
-            <Icon name="power" />
-          </LogoutButton>
-        </UserWrapper>
-      </Header>
 
-      <HighlightCards>
-        <HighlightCard
-          type="up"
-          title="Entrega"
-          amount="R$ 17.400,00"
-          lastTransition="Última entrada dia 13 de abril"
-        />
+            <HighlightCard
+              type="down"
+              title="Saídas"
+              amount={highlightData?.expensives?.amount}
+              lastTransition="Última entrada dia 13 de abril"
+            />
 
-        <HighlightCard
-          type="down"
-          title="Saídas"
-          amount="- R$ 1.259,00"
-          lastTransition="Última saída dia 03 de abril"
-        />
+            <HighlightCard
+              type="total"
+              title="Total"
+              amount={highlightData?.total?.amount}
+              lastTransition="01 à 16 de abril"
+            />
+          </HighlightCards>
 
-        <HighlightCard
-          type="total"
-          title="Total"
-          amount="R$ 16.141,00"
-          lastTransition="01 à 16 de abril"
-        />
-      </HighlightCards>
+          <Transitions>
+            <Title>Listagem</Title>
 
-      <Transitions>
-        <Title>Listagem</Title>
-        
-        <TransitionsList
-          data={data}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => <TransationCard data={item}/>}
-        />
-
-      </Transitions>
+            <TransitionsList
+              data={transitions}
+              keyExtractor={(item: DateListProps) => item.id.toString()}
+              renderItem={({ item }: any) => <TransationCard data={item} />}
+            />
+          </Transitions>
+        </>
+      )}
     </Container>
   );
 }

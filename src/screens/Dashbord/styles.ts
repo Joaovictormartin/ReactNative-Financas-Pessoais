@@ -1,6 +1,6 @@
 import styled from "styled-components/native";
-import { FlatList } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { FlatList } from "react-native";
 import { BorderlessButton } from "react-native-gesture-handler";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 
@@ -9,6 +9,12 @@ import { DateListProps } from "./index";
 export const Container = styled.View`
   flex: 1;
   background: ${({ theme }) => theme.colors.background};
+`;
+
+export const LoadContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const Header = styled.View`
