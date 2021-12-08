@@ -12,8 +12,8 @@ import {
 } from "./styles";
 
 export interface TransationCardProps {
-  type: 'positive' | 'negative';
-  title: string;
+  transactionTypes: 'up' | 'down';
+  name: string;
   amount: string;
   date: string;
   category: {
@@ -29,9 +29,12 @@ interface Props {
 export function TransationCard({ data }: Props) {
   return (
     <Container>
-      <Title>{data.title}</Title>
-      <Amount type={data.type}>
-        {data.type === 'negative' && '- '}
+      <Title>
+        {data.name}
+      </Title>
+
+      <Amount transactionTypes={data.transactionTypes}>
+        {data.transactionTypes === 'down' && '- '}
         {data.amount}
       </Amount>
 
