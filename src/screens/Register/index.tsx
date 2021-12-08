@@ -8,10 +8,13 @@ import * as Yup from "yup";
 import uuid from 'react-native-uuid';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { dataTransactionKey } from '../../utils/asyncStorageKeys';
+
 import { Button } from "../../components/Forms/Button";
 import { InputForm } from "../../components/Forms/InputForm";
 import { CategorySelectButton } from "../../components/Forms/CategorySelectButton";
 import { TransactionTypesButton } from "../../components/Forms/TransactionTypesButton";
+
 
 import { CategorySelect } from "../CategorySelect";
 
@@ -43,10 +46,11 @@ export function Register() {
   const [category, setCategory] = useState({
     key: "category",
     name: "Categoria",
+    icon: "",
+    color: "",
   });
 
   const navigation = useNavigation();
-  const dataKey = "@gofinances:transactions";
 
   const {
     reset,
@@ -83,26 +87,28 @@ export function Register() {
       name: form.name,
       amount: form.amount,
       transactionTypes,
-      category: category.key,
+      category: category,
       date: new Date()
     };
 
     try {
-      const data = await AsyncStorage.getItem(dataKey);   //pega o ultimo dado do AsyncStorage
-      const currentData = data ? JSON.parse(data) : [];   //converte para JSON
+      const data = await AsyncStorage.getItem(dataTransactionKey);   //pega o ultimo dado do AsyncStorage
+      const currentData = data ? JSON.parse(data) : [];              //converte para JSON
 
-      const dataFormatted = [                             //junta o ultimo com o new
+      const dataFormatted = [                                        //junta o ultimo com o new
         ...currentData,
         newTransaction,
       ];
 
-      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted)); //salva o dado com a nova transaction
+      await AsyncStorage.setItem(dataTransactionKey, JSON.stringify(dataFormatted)); //salva o dado com a nova transaction
 
       reset();
       setTransactionTypes('');
       setCategory({
         key: 'category',
         name: 'Categoria',
+        icon: "",
+        color: "",
       })
 
       //@ts-ignore
@@ -145,13 +151,17 @@ export function Register() {
                 type="up"
                 title="Income"
                 isActive={transactionTypes === "up"}
-                onPress={() => handleTransactionSelect("up")}
+                onPress={() => {
+                  handleTransactionSelect("up")
+                }}
               />
               <TransactionTypesButton
                 type="down"
                 title="Outcome"
                 isActive={transactionTypes === "down"}
-                onPress={() => handleTransactionSelect("down")}
+                onPress={() => {
+                  handleTransactionSelect("down")
+                }}
               />
             </TransactionTypes>
 
