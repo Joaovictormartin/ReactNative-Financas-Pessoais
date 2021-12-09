@@ -1,5 +1,6 @@
 import styled from "styled-components/native";
 import { RFValue } from "react-native-responsive-fontsize";
+import { ScrollView } from "react-native";
 
 export const Container = styled.SafeAreaView`
   flex: 1;
@@ -8,7 +9,7 @@ export const Container = styled.SafeAreaView`
 
 export const Header = styled.View`
   width: 100%;
-  height: ${RFValue(140)}px;
+  height: ${RFValue(113)}px;
 
   align-items: center;
   justify-content: flex-end;
@@ -23,6 +24,11 @@ export const Title = styled.Text`
   color: ${({ theme }) => theme.colors.shape};
 `;
 
-export const Content = styled.ScrollView.attrs({
-  contentContainerStyle: { flex: 1, padding: 24 }
+export const Content = styled(ScrollView).attrs({
+  contentContainerStyle: { padding: 24 },
 })``;
+
+export const ChartContainer = styled.View`
+  width: 100%;
+  align-items: center;
+`;
