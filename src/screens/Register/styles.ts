@@ -8,7 +8,7 @@ export const Container = styled.SafeAreaView`
 
 export const Header = styled.View`
   width: 100%;
-  height: ${RFValue(140)}px;
+  height: ${RFValue(113)}px;
 
   align-items: center;
   justify-content: flex-end;
