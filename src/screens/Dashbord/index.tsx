@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ActivityIndicator } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import { ActivityIndicator } from "react-native";
 import { useTheme } from "styled-components";
 
 import { dataTransactionKey } from "../../utils/asyncStorageKeys";
 
 import { HighlightCard } from "../../components/HighlightCard";
+import { TransationCard } from "../../components/TransationCard";
+
 import {
-  TransationCard,
-  TransationCardProps,
-} from "../../components/TransationCard";
+  DateListProps,
+  HighlightDate,
+} from "../../../interface/DashboardProps";
 
 import {
   Container,
@@ -30,28 +32,23 @@ import {
   TransitionsList,
 } from "./styles";
 
-export interface DateListProps extends TransationCardProps {
-  id: string;
-}
-
-interface HighlightProps {
-  amount: any;
-}
-
-interface HighlightDate {
-  entries: HighlightProps;
-  expensives: HighlightProps;
-  total: HighlightProps;
-}
-
 export function Dashboard() {
   const { colors } = useTheme();
 
   const [transitions, setTransitions] = useState<DateListProps[]>([]);
-  const [highlightData, setHighlightData] = useState<HighlightDate>(
-    {} as HighlightDate
-  );
-  const [isLoading, setIsLoading] = useState(true);
+  const [highlightData, setHighlightData] = useState<HighlightDate>({} as HighlightDate);
+  const [isLoading, setIsLoading] = useState(false);
+
+  //função para pega a última data de entrada ou saída
+  function getLastTransitionDate(collection: DateListProps[], type: "up" | "down") {
+
+    const lastTransition = new Date(
+    Math.max.apply(Math, collection //para pegar a maior data(ultima)
+    .filter((item) => item.transactionTypes === type) //filtra pelo type
+    .map((item) => new Date(item.date).getTime()))); //retorna só a data
+
+    return `${lastTransition.getDate()} de ${lastTransition.toLocaleDateString('pt-BR', { month: 'long' })}`
+  }
 
   async function loadTransitions() {
     let entriesTotal = 0; //Variavel para soma as entradas
@@ -60,12 +57,12 @@ export function Dashboard() {
     const response = await AsyncStorage.getItem(dataTransactionKey); //pega os dados do AsyncStorage
     const transaction = response ? JSON.parse(response) : []; //o JSON transforma em obj
 
-    const transactionsFormatted: DateListProps[] = transaction.map(
-      (item: DateListProps) => {
+    const transactionsFormatted: DateListProps[] = transaction
+    .map((item: DateListProps) => {
         if (item.transactionTypes === "up") {
           entriesTotal += Number(item.amount);
         } else {
-          expensiveTotal = +Number(item.amount);
+          expensiveTotal += Number(item.amount);
         }
 
         const amount = Number(item.amount) //Formatando para moeda real
@@ -94,6 +91,10 @@ export function Dashboard() {
 
     setTransitions(transactionsFormatted);
 
+    const lastTransitionEntries = getLastTransitionDate(transaction, "up"); //pega a ultima data de entrada
+    const lastTransitionExpensive = getLastTransitionDate(transaction, "down"); //pega a ultima data de saída
+    const totalInterval = `01 a ${lastTransitionExpensive}`
+
     const total = entriesTotal - expensiveTotal; //Variavel para soma o total
     setHighlightData({
       entries: {
@@ -101,21 +102,24 @@ export function Dashboard() {
         amount: entriesTotal.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
-        })
+        }),
+        lastTransition: `Última entrada dia ${lastTransitionEntries}`
       },
       expensives: {
         //Formantando a saída para o real
         amount: expensiveTotal.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
-        })
+        }),
+        lastTransition: `Última saída dia ${lastTransitionExpensive}`
       },
       total: {
         //Formantando o total para o real
         amount: total.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
-        })
+        }),
+        lastTransition: totalInterval
       },
     });
 
@@ -165,27 +169,27 @@ export function Dashboard() {
               type="up"
               title="Entradas"
               amount={highlightData?.entries?.amount}
-              lastTransition="Última entrada dia 13 de abril"
+              lastTransition={highlightData?.entries?.lastTransition}
             />
 
             <HighlightCard
               type="down"
               title="Saídas"
               amount={highlightData?.expensives?.amount}
-              lastTransition="Última entrada dia 13 de abril"
+              lastTransition={highlightData?.expensives?.lastTransition}
             />
 
             <HighlightCard
               type="total"
               title="Total"
               amount={highlightData?.total?.amount}
-              lastTransition="01 à 16 de abril"
+              lastTransition={highlightData?.total?.lastTransition}
             />
           </HighlightCards>
 
           <Transitions>
             <Title>Listagem</Title>
-
+            
             <TransitionsList
               data={transitions}
               keyExtractor={(item: DateListProps) => item.id.toString()}
