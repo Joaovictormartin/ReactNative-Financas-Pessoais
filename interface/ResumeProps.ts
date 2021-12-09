@@ -4,4 +4,5 @@ export interface CategoryData {
   color: string;
   total: number;
   totalFormatted: string;
+  percent: string;
 }
