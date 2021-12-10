@@ -36,18 +36,29 @@ export function Dashboard() {
   const { colors } = useTheme();
 
   const [transitions, setTransitions] = useState<DateListProps[]>([]);
-  const [highlightData, setHighlightData] = useState<HighlightDate>({} as HighlightDate);
+  const [highlightData, setHighlightData] = useState<HighlightDate>(
+    {} as HighlightDate
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   //função para pega a última data de entrada ou saída
-  function getLastTransitionDate(collection: DateListProps[], type: "up" | "down") {
-
+  function getLastTransitionDate(
+    collection: DateListProps[],
+    type: "up" | "down"
+  ) {
     const lastTransition = new Date(
-    Math.max.apply(Math, collection //para pegar a maior data(ultima)
-    .filter((item) => item.transactionTypes === type) //filtra pelo type
-    .map((item) => new Date(item.date).getTime()))); //retorna só a data
+      Math.max.apply(
+        Math,
+        collection //para pegar a maior data(ultima)
+          .filter((item) => item.transactionTypes === type) //filtra pelo type
+          .map((item) => new Date(item.date).getTime())
+      )
+    ); //retorna só a data
 
-    return `${lastTransition.getDate()} de ${lastTransition.toLocaleDateString('pt-BR', { month: 'long' })}`
+    return `${lastTransition.getDate()} de ${lastTransition.toLocaleDateString(
+      "pt-BR",
+      { month: "long" }
+    )}`;
   }
 
   async function loadTransitions() {
@@ -57,8 +68,8 @@ export function Dashboard() {
     const response = await AsyncStorage.getItem(dataTransactionKey); //pega os dados do AsyncStorage
     const transaction = response ? JSON.parse(response) : []; //o JSON transforma em obj
 
-    const transactionsFormatted: DateListProps[] = transaction
-    .map((item: DateListProps) => {
+    const transactionsFormatted: DateListProps[] = transaction.map(
+      (item: DateListProps) => {
         if (item.transactionTypes === "up") {
           entriesTotal += Number(item.amount);
         } else {
@@ -93,7 +104,7 @@ export function Dashboard() {
 
     const lastTransitionEntries = getLastTransitionDate(transaction, "up"); //pega a ultima data de entrada
     const lastTransitionExpensive = getLastTransitionDate(transaction, "down"); //pega a ultima data de saída
-    const totalInterval = `01 a ${lastTransitionExpensive}`
+    const totalInterval = `01 a ${lastTransitionExpensive}`;
 
     const total = entriesTotal - expensiveTotal; //Variavel para soma o total
     setHighlightData({
@@ -103,7 +114,7 @@ export function Dashboard() {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransition: `Última entrada dia ${lastTransitionEntries}`
+        lastTransition: `Última entrada dia ${lastTransitionEntries}`,
       },
       expensives: {
         //Formantando a saída para o real
@@ -111,7 +122,7 @@ export function Dashboard() {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransition: `Última saída dia ${lastTransitionExpensive}`
+        lastTransition: `Última saída dia ${lastTransitionExpensive}`,
       },
       total: {
         //Formantando o total para o real
@@ -119,7 +130,7 @@ export function Dashboard() {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransition: totalInterval
+        lastTransition: totalInterval,
       },
     });
 
@@ -136,34 +147,43 @@ export function Dashboard() {
     }, [])
   );
 
+  const loadingContainer = () => {
+    return (
+      <LoadContainer>
+        <ActivityIndicator 
+          color={colors.primary} 
+          size="large" 
+        />
+      </LoadContainer>
+    );
+  };
+
   return (
     <Container>
+      <Header>
+        <UserWrapper>
+          <UserInfo>
+            <Avatar
+              source={{
+                uri: "https://avatars.githubusercontent.com/u/69825217?v=4",
+              }}
+            />
+            <User>
+              <UserGreeting>Olá, </UserGreeting>
+              <UserName>João</UserName>
+            </User>
+          </UserInfo>
+
+          <LogoutButton onPress={() => {}}>
+            <Icon name="power" />
+          </LogoutButton>
+        </UserWrapper>
+      </Header>
+
       {isLoading ? (
-        <LoadContainer>
-          <ActivityIndicator color={colors.primary} size="large" />
-        </LoadContainer>
+        loadingContainer()
       ) : (
         <>
-          <Header>
-            <UserWrapper>
-              <UserInfo>
-                <Avatar
-                  source={{
-                    uri: "https://avatars.githubusercontent.com/u/69825217?v=4",
-                  }}
-                />
-                <User>
-                  <UserGreeting>Olá, </UserGreeting>
-                  <UserName>João</UserName>
-                </User>
-              </UserInfo>
-
-              <LogoutButton onPress={() => {}}>
-                <Icon name="power" />
-              </LogoutButton>
-            </UserWrapper>
-          </Header>
-
           <HighlightCards>
             <HighlightCard
               type="up"
@@ -189,7 +209,7 @@ export function Dashboard() {
 
           <Transitions>
             <Title>Listagem</Title>
-            
+
             <TransitionsList
               data={transitions}
               keyExtractor={(item: DateListProps) => item.id.toString()}

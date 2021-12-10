@@ -7,6 +7,12 @@ export const Container = styled.SafeAreaView`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
+export const LoadContainer = styled.SafeAreaView`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
 export const Header = styled.View`
   width: 100%;
   height: ${RFValue(113)}px;
