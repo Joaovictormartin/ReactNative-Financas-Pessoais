@@ -35,12 +35,11 @@ export function Resume() {
   const [selectedDate, setSelectDate] = useState(new Date());
 
   function handleDateChange(action: "next" | "prev") {
-    if (action === "next") {
-      setSelectDate(addMonths(selectedDate, 1));
-;
-    } else {
-      setSelectDate(subMonths(selectedDate, 1));
-    }
+    setIsLoading(true);
+    
+    action === "next" 
+      ? setSelectDate(addMonths(selectedDate, 1))
+      : setSelectDate(subMonths(selectedDate, 1));
   }
 
   async function loadData() {
@@ -96,11 +95,10 @@ export function Resume() {
           totalFormatted,
           percent,
         });
-
-        setIsLoading(false);
       }
     });
     setTotalByCategory(totalByCategory); //set o valor no useState
+    setIsLoading(false); //cancela o loading
   }
 
   useEffect(() => {
