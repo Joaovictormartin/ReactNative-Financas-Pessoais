@@ -101,14 +101,10 @@ export function Resume() {
     setIsLoading(false); //cancela o loading
   }
 
-  useEffect(() => {
-    loadData();
-  }, [selectedDate]);
-
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [])
+    }, [selectedDate])
   );
 
   const loadingContainer = () => {
