@@ -29,6 +29,7 @@ import {
   HighlightCards,
   Transitions,
   Title,
+  TextList,
   TransitionsList,
 } from "./styles";
 
@@ -210,11 +211,15 @@ export function Dashboard() {
           <Transitions>
             <Title>Listagem</Title>
 
-            <TransitionsList
-              data={transitions}
-              keyExtractor={(item: DateListProps) => item.id.toString()}
-              renderItem={({ item }: any) => <TransationCard data={item} />}
-            />
+            {
+              transitions ? (
+                <TransitionsList
+                  data={transitions}
+                  keyExtractor={(item: DateListProps) => item.id.toString()}
+                  renderItem={({ item }: any) => <TransationCard data={item} />}
+                />
+              ): <TextList>Não há dados registrados</TextList> 
+            }
           </Transitions>
         </>
       )}

@@ -4,7 +4,7 @@ import { FlatList } from "react-native";
 import { BorderlessButton } from "react-native-gesture-handler";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 
-import { DateListProps } from "./index";
+import { DateListProps } from "../../../interface/DashboardProps";
 
 export const Container = styled.View`
   flex: 1;
@@ -94,6 +94,14 @@ export const Transitions = styled.View`
 export const Title = styled.Text`
   font-size: ${RFValue(18)}px;
   font-family: ${({ theme }) => theme.fonts.regular};
+`;
+
+export const TextList = styled.Text`
+  font-size: ${RFValue(12)}px;
+  font-family: ${({ theme }) => theme.fonts.regular};
+  opacity: 0.6;
+
+  margin-top: 20px;
 `;
 
 export const TransitionsList = styled(
