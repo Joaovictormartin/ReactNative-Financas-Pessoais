@@ -17,6 +17,7 @@ import {
 import theme from "./global/styles/theme";
 
 import { AppRoutes } from "./routes/app.routes";
+import { SignIn } from "./screens/SignIn";
 
 export default function App() {
   const [fontLoaded] = useFonts({
@@ -36,7 +37,7 @@ export default function App() {
           barStyle="light-content" 
           backgroundColor={theme.colors.primary}
         />
-        <AppRoutes />
+        <SignIn />
       </NavigationContainer>
     </ThemeProvider>
   );
