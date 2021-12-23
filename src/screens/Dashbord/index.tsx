@@ -5,7 +5,7 @@ import { ActivityIndicator } from "react-native";
 import { useTheme } from "styled-components";
 
 import { dataTransactionKey } from "../../utils/asyncStorageKeys";
-
+import { useAuth } from '../../hooks/Auth';
 import { HighlightCard } from "../../components/HighlightCard";
 import { TransationCard } from "../../components/TransationCard";
 
@@ -35,6 +35,7 @@ import {
 
 export function Dashboard() {
   const { colors } = useTheme();
+  const { user } = useAuth();
 
   const [transitions, setTransitions] = useState<DateListProps[]>([]);
   const [highlightData, setHighlightData] = useState<HighlightDate>(
@@ -165,13 +166,11 @@ export function Dashboard() {
         <UserWrapper>
           <UserInfo>
             <Avatar
-              source={{
-                uri: "https://avatars.githubusercontent.com/u/69825217?v=4",
-              }}
+              source={user?.photo}
             />
             <User>
               <UserGreeting>Olá, </UserGreeting>
-              <UserName>João</UserName>
+              <UserName>{user?.name}</UserName>
             </User>
           </UserInfo>
 
