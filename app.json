@@ -2,7 +2,7 @@
   "expo": {
     "name": "FinancaPessoais",
     "slug": "FinancaPessoais",
-    "schema": "FinancaPessoais",
+    "scheme": "FinancaPessoais",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
