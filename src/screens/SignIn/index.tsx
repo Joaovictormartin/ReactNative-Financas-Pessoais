@@ -1,5 +1,5 @@
-import React from "react";
-import { Alert, Platform } from 'react-native';
+import React, { useState } from "react";
+import { ActivityIndicator, Alert, Platform } from 'react-native';
 import { RFValue } from "react-native-responsive-fontsize";
 
 import AppSvg from "../../assets/svg/icon-apple.svg";
@@ -22,28 +22,39 @@ import {
 
 export function SignIn() {
 
+  const [ isLoading, setIsLoading ] = useState(false);
   const { signInWithGoogle, signInWithApple } = useAuth();
 
   async function handleSignInWithGoogle() {
     try {
-
-      await signInWithGoogle();
-
+      setIsLoading(true);
+      return await signInWithGoogle();
     } catch (err) {
-      console.log(err)
       Alert.alert("Aviso", "Não foi possível conectar a conta Google");
+    } finally {
+      setIsLoading(false);
     }
   }
 
   async function handleSignInWithApple() {
     try {
-
-      await signInWithApple();
-
+      setIsLoading(true);
+      return await signInWithApple();
     } catch (err) {
-      console.log(err)
       Alert.alert("Aviso", "Não foi possível conectar a conta Apple");
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  function load() {
+    return(
+      <ActivityIndicator 
+        color="#fff" 
+        size="small"
+        style={{marginTop: 18}}
+      />
+    )
   }
 
   return (
@@ -76,12 +87,14 @@ export function SignIn() {
             onPress={handleSignInWithApple}
           />
           
-          {
+          {/* {
             Platform.OS === "ios" ? ( null
             ) : null
-          }
+          } */}
           
         </FooterWrapper>
+
+        { isLoading && load()}
       </Footer>
     </Container>
   );
