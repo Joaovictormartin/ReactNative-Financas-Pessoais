@@ -1,4 +1,10 @@
-import React, { useState, createContext, useContext, ReactNode } from 'react';
+import React, { 
+  useState, 
+  useEffect, 
+  createContext,
+  useContext, 
+  ReactNode 
+} from 'react';
 import * as AuthSession from 'expo-auth-session';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,6 +26,8 @@ interface AuthContextData {
   user: User;
   signInWithGoogle(): Promise<void>;
   signInWithApple(): Promise<void>;
+  signOut(): Promise<void>;
+  isLoading: boolean;
 }
 
 interface AuthorizationResponse {
@@ -36,8 +44,24 @@ const AuthContext = createContext({} as AuthContextData);
 
 function AuthProvider({ children } : AuthProviderProps) {
 
-  const [ user, setUser ] = useState<User>({} as User)
+  const [ user, setUser ] = useState<User>({} as User);
+  const [ isLoading, setIsLoading ] = useState(true);
 
+  useEffect(() => {
+    async function loadStoreDate() {
+      const userStoraged = await AsyncStorage.getItem(dataUser);
+
+      if (userStoraged) {
+        const userLoggend = JSON.parse(userStoraged) as User;
+        setUser(userLoggend);
+      }
+
+      setIsLoading(false);
+    }
+    loadStoreDate();
+  },[]);
+
+  //autenticação com o google
   async function signInWithGoogle() {
     try {
 
@@ -69,6 +93,7 @@ function AuthProvider({ children } : AuthProviderProps) {
     }
   }
 
+  //autenticação com o apple
   async function signInWithApple() {
     try {
 
@@ -95,8 +120,13 @@ function AuthProvider({ children } : AuthProviderProps) {
     }
   }
 
+  async function signOut(){
+    setUser({} as User);
+    await AsyncStorage.removeItem(dataUser);
+  }
+
   return (
-    <AuthContext.Provider value={{ user, signInWithGoogle, signInWithApple }}>
+    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithApple, signOut }}>
       { children }
     </AuthContext.Provider>
   )
