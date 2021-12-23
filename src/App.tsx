@@ -1,12 +1,9 @@
 import React from "react";
-import 'intl';
-import 'intl/locale-data/jsonp/pt-BR';
-import { StatusBar } from 'react-native';
-
+import "intl";
+import "intl/locale-data/jsonp/pt-BR";
+import { StatusBar } from "react-native";
 import AppLoading from "expo-app-loading";
 import { ThemeProvider } from "styled-components";
-import { NavigationContainer } from "@react-navigation/native";
-
 import {
   useFonts,
   Poppins_400Regular,
@@ -16,8 +13,8 @@ import {
 
 import theme from "./global/styles/theme";
 
-import { AppRoutes } from "./routes/app.routes";
-import { SignIn } from "./screens/SignIn";
+import { Routes } from "./routes";
+import { AuthProvider, useAuth } from "./hooks/Auth";
 
 export default function App() {
   const [fontLoaded] = useFonts({
@@ -25,20 +22,19 @@ export default function App() {
     Poppins_500Medium,
     Poppins_700Bold,
   });
+  
+  const { isLoading } = useAuth();
 
-  if (!fontLoaded) {
+  if (!fontLoaded || isLoading) {
     return <AppLoading />;
   }
 
   return (
     <ThemeProvider theme={theme}>
-      <NavigationContainer>
-        <StatusBar 
-          barStyle="light-content" 
-          backgroundColor={theme.colors.primary}
-        />
-        <SignIn />
-      </NavigationContainer>
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
+      <AuthProvider>
+        <Routes />
+      </AuthProvider>
     </ThemeProvider>
   );
 }
