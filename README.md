@@ -1,4 +1,4 @@
-# Projeto goFinances React Native
+# Projeto goFinances
 
 ## Sobre o projeto
 
@@ -17,7 +17,7 @@ E por fim a Resume, aonde o usuário irá visualizar um gráfico com legenda dos
 - Responsive Fontsize
 - React Native SVG
 - React Native UUID
-- Victory Nnative
+- Victory Native
 - Yup
 - Form
 
