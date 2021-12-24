@@ -62,3 +62,9 @@ export const ChartContainer = styled.View`
   width: 100%;
   align-items: center;
 `;
+
+export const Text = styled.Text`
+  font-size: ${RFValue(12)}px;
+  font-family: ${({ theme }) => theme.fonts.regular};
+  opacity: 0.6;
+`;

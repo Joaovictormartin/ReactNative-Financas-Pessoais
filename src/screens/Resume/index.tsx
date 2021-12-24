@@ -9,10 +9,10 @@ import { RFValue } from "react-native-responsive-fontsize";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { TransationCardProps } from "../../../interface/TransationCardProps";
-import { dataTransactionKey } from "../../utils/asyncStorageKeys";
 import { CategoryData } from "../../../interface/ResumeProps";
 import { HistoryCar } from "../../components/HistoryCar";
 import { categories } from "../../utils/categories";
+import { useAuth } from "../../hooks/Auth";
 
 import {
   Container,
@@ -25,10 +25,12 @@ import {
   Month,
   Content,
   ChartContainer,
+  Text,
 } from "./styles";
 
 export function Resume() {
   const { colors } = useTheme();
+  const { user } = useAuth();
 
   const [totalByCategory, setTotalByCategory] = useState<CategoryData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,21 +38,22 @@ export function Resume() {
 
   function handleDateChange(action: "next" | "prev") {
     setIsLoading(true);
-    
-    action === "next" 
+
+    action === "next"
       ? setSelectDate(addMonths(selectedDate, 1))
       : setSelectDate(subMonths(selectedDate, 1));
   }
 
   async function loadData() {
+    const dataTransactionKey = `@gofinances:transactions_user:${user.id}`; //key AsyncStorage
     const response = await AsyncStorage.getItem(dataTransactionKey); //pega os dados do AsyncStorage
     const responseFormatted = response ? JSON.parse(response) : []; //transforma em obj
 
-    const expensives = responseFormatted
-    .filter((item: TransationCardProps) => 
-      item.transactionTypes === "down" && //filtra somente os types negativos
-      new Date(item.date).getMonth() === selectedDate.getMonth() && //verifica se o mês é igual a data escolhida
-      new Date(item.date).getFullYear() === selectedDate.getFullYear() // verifica se o ano é igual a data escolhida
+    const expensives = responseFormatted.filter(
+      (item: TransationCardProps) =>
+        item.transactionTypes === "down" && //filtra somente os types negativos
+        new Date(item.date).getMonth() === selectedDate.getMonth() && //verifica se o mês é igual a data escolhida
+        new Date(item.date).getFullYear() === selectedDate.getFullYear() // verifica se o ano é igual a data escolhida
     );
 
     //calcula o total de gastos
@@ -130,7 +133,7 @@ export function Resume() {
               <SelectIcon name="chevron-left" />
             </MonthSelectButton>
 
-            <Month>{format(selectedDate, 'MMMM/yyyy', { locale: ptBR })}</Month>
+            <Month>{format(selectedDate, "MMMM/yyyy", { locale: ptBR })}</Month>
 
             <MonthSelectButton onPress={() => handleDateChange("next")}>
               <SelectIcon name="chevron-right" />
@@ -139,20 +142,22 @@ export function Resume() {
 
           <Content showsVerticalScrollIndicator={false}>
             <ChartContainer>
-              <VictoryPie
-                data={totalByCategory} //fonte de dados
-                x="percent" //label
-                y="total" //valor
-                colorScale={totalByCategory.map((item) => item.color)} // cor interna do gráfico
-                labelRadius={100} //distancia dos labels
-                style={{
-                  labels: {
-                    fontSize: RFValue(15),
-                    fontWeight: "bold",
-                    fill: colors.shape,
-                  },
-                }}
-              />
+              {totalByCategory.length > 0 ? (
+                <VictoryPie
+                  data={totalByCategory} //fonte de dados
+                  x="percent" //label
+                  y="total" //valor
+                  colorScale={totalByCategory.map((item) => item.color)} // cor interna do gráfico
+                  labelRadius={100} //distancia dos labels
+                  style={{
+                    labels: {
+                      fontSize: RFValue(15),
+                      fontWeight: "bold",
+                      fill: colors.shape,
+                    },
+                  }}
+                />
+              ) : <Text>Não há dados registrados</Text> }
             </ChartContainer>
 
             {totalByCategory.map((item) => (
