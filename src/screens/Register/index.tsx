@@ -8,7 +8,7 @@ import * as Yup from "yup";
 import uuid from 'react-native-uuid';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { dataTransactionKey } from '../../utils/asyncStorageKeys';
+import { useAuth } from '../../hooks/Auth';
 
 import { Button } from "../../components/Forms/Button";
 import { InputForm } from "../../components/Forms/InputForm";
@@ -24,6 +24,7 @@ import {
   Title,
   Form,
   Fields,
+  WrapperButton,
   TransactionTypes,
 } from "./styles";
 
@@ -51,7 +52,7 @@ export function Register() {
   });
 
   const navigation = useNavigation();
-
+  const { user } = useAuth();
   const {
     reset,
     control,
@@ -90,8 +91,9 @@ export function Register() {
       category: category,
       date: new Date()
     };
-
+ 
     try {
+      const dataTransactionKey = `@gofinances:transactions_user:${user.id}`; //key AsyncStorage
       const data = await AsyncStorage.getItem(dataTransactionKey);   //pega o ultimo dado do AsyncStorage
       const currentData = data ? JSON.parse(data) : [];              //converte para JSON
 
@@ -115,7 +117,6 @@ export function Register() {
       navigation.navigate('Listagem');
 
     } catch (err) {
-      console.log(err);
       Alert.alert("Aviso", "Não foi possível salvar");
     }
   }
@@ -170,8 +171,10 @@ export function Register() {
               onPress={handleOpenSelectCategory}
             />
           </Fields>
-
-          <Button title="Enviar" onPress={handleSubmit(handleRegister)} />
+          
+          <WrapperButton>
+            <Button title="Enviar" onPress={handleSubmit(handleRegister)} />
+          </WrapperButton>
         </Form>
 
         <Modal visible={categoryModalOpen}>
