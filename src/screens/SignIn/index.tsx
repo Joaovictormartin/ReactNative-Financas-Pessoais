@@ -31,9 +31,8 @@ export function SignIn() {
       return await signInWithGoogle();
     } catch (err) {
       Alert.alert("Aviso", "Não foi possível conectar a conta Google");
-    } finally {
       setIsLoading(false);
-    }
+    } 
   }
 
   async function handleSignInWithApple() {
@@ -42,9 +41,8 @@ export function SignIn() {
       return await signInWithApple();
     } catch (err) {
       Alert.alert("Aviso", "Não foi possível conectar a conta Apple");
-    } finally {
       setIsLoading(false);
-    }
+    } 
   }
 
   function load() {
@@ -81,16 +79,16 @@ export function SignIn() {
             title="Entrar com Google"
             onPress={handleSignInWithGoogle}
           />
-          <SignInSocialButton
-            svg={AppSvg}
-            title="Entrar com Apple"
-            onPress={handleSignInWithApple}
-          />
           
-          {/* {
-            Platform.OS === "ios" ? ( null
-            ) : null
-          } */}
+          {
+            Platform.OS === "ios" && ( 
+              <SignInSocialButton
+                svg={AppSvg}
+                title="Entrar com Apple"
+                onPress={handleSignInWithApple}
+              />
+            )
+          }
           
         </FooterWrapper>
 
