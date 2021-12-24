@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, LogBox } from "react-native";
 import { useTheme } from "styled-components";
 
-import { dataTransactionKey } from "../../utils/asyncStorageKeys";
 import { useAuth } from '../../hooks/Auth';
 import { HighlightCard } from "../../components/HighlightCard";
 import { TransationCard } from "../../components/TransationCard";
@@ -33,9 +32,11 @@ import {
   TransitionsList,
 } from "./styles";
 
+LogBox.ignoreAllLogs()
+
 export function Dashboard() {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const [transitions, setTransitions] = useState<DateListProps[]>([]);
   const [highlightData, setHighlightData] = useState<HighlightDate>(
@@ -44,21 +45,20 @@ export function Dashboard() {
   const [isLoading, setIsLoading] = useState(false);
 
   //função para pega a última data de entrada ou saída
-  function getLastTransitionDate(
-    collection: DateListProps[],
-    type: "up" | "down"
-  ) {
-    const lastTransition = new Date(
-      Math.max.apply(
-        Math,
-        collection //para pegar a maior data(ultima)
-          .filter((item) => item.transactionTypes === type) //filtra pelo type
-          .map((item) => new Date(item.date).getTime())
-      )
-    ); //retorna só a data
+  function getLastTransitionDate(collection: DateListProps[], type: "up" | "down") {
 
-    return `${lastTransition.getDate()} de ${lastTransition.toLocaleDateString(
-      "pt-BR",
+    const collectionFilttered = collection //para pegar a maior data(ultima)
+    .filter((item) => item.transactionTypes === type) //filtra pelo type
+
+    if (collectionFilttered.length === 0) return 0;
+    
+    const lastTransition = new Date(
+    Math.max.apply( Math, collectionFilttered
+    .map((item) => new Date(item.date).getTime())
+    )); //retorna só a data
+
+    return `${lastTransition.getDate()} de ${lastTransition
+    .toLocaleDateString("pt-BR",
       { month: "long" }
     )}`;
   }
@@ -67,6 +67,8 @@ export function Dashboard() {
     let entriesTotal = 0; //Variavel para soma as entradas
     let expensiveTotal = 0; //Variavel para soma as saídas
 
+    
+    const dataTransactionKey = `@gofinances:transactions_user:${user.id}`; //key AsyncStorage
     const response = await AsyncStorage.getItem(dataTransactionKey); //pega os dados do AsyncStorage
     const transaction = response ? JSON.parse(response) : []; //o JSON transforma em obj
 
@@ -106,7 +108,9 @@ export function Dashboard() {
 
     const lastTransitionEntries = getLastTransitionDate(transaction, "up"); //pega a ultima data de entrada
     const lastTransitionExpensive = getLastTransitionDate(transaction, "down"); //pega a ultima data de saída
-    const totalInterval = `01 a ${lastTransitionExpensive}`;
+    const totalInterval = lastTransitionExpensive === 0
+      ? 'Não há transações' 
+      : `01 a ${lastTransitionExpensive}`;
 
     const total = entriesTotal - expensiveTotal; //Variavel para soma o total
     setHighlightData({
@@ -116,7 +120,9 @@ export function Dashboard() {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransition: `Última entrada dia ${lastTransitionEntries}`,
+        lastTransition: lastTransitionEntries === 0
+          ? 'Não há transações'
+          : `Última entrada dia ${lastTransitionEntries}`,
       },
       expensives: {
         //Formantando a saída para o real
@@ -124,7 +130,9 @@ export function Dashboard() {
           style: "currency",
           currency: "BRL",
         }),
-        lastTransition: `Última saída dia ${lastTransitionExpensive}`,
+        lastTransition: lastTransitionExpensive === 0
+          ? 'Não há transações'
+          : `Última saída dia ${lastTransitionExpensive}`,
       },
       total: {
         //Formantando o total para o real
@@ -165,24 +173,21 @@ export function Dashboard() {
       <Header>
         <UserWrapper>
           <UserInfo>
-            <Avatar
-              source={user?.photo}
-            />
+            <Avatar source={{ uri: user?.photo}} />
+            
             <User>
               <UserGreeting>Olá, </UserGreeting>
               <UserName>{user?.name}</UserName>
             </User>
           </UserInfo>
 
-          <LogoutButton onPress={() => {}}>
+          <LogoutButton onPress={signOut}>
             <Icon name="power" />
           </LogoutButton>
         </UserWrapper>
       </Header>
 
-      {isLoading ? (
-        loadingContainer()
-      ) : (
+      {isLoading ? loadingContainer() : (
         <>
           <HighlightCards>
             <HighlightCard
@@ -211,7 +216,7 @@ export function Dashboard() {
             <Title>Listagem</Title>
 
             {
-              transitions ? (
+              transitions.length > 0 ? (
                 <TransitionsList
                   data={transitions}
                   keyExtractor={(item: DateListProps) => item.id.toString()}
